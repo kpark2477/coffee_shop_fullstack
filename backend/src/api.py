@@ -12,7 +12,7 @@ setup_db(app)
 CORS(app)
 
 '''
-@TODO uncomment the following line to initialize the datbase
+@TODO uncomment the following line to initialize the datbase    
 !! NOTE THIS WILL DROP ALL RECORDS AND START YOUR DB FROM SCRATCH
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 '''
@@ -48,7 +48,8 @@ def get_drinks():
 '''
 
 @app.route('/drinks-detail')
-def get_drinks_detail():
+@requires_auth('get:drinks-detail')
+def get_drinks_detail(payload):
     selection = Drink.query.order_by(Drink.id).all()
     drinks = [drink.long() for drink in selection]
 
@@ -68,7 +69,8 @@ def get_drinks_detail():
 '''
 
 @app.route('/drinks', methods=['POST'])
-def get_drink():
+@requires_auth('post:drinks')
+def get_drink(payload):
     body = request.get_json()
 
     new_title = body.get('title', None)
@@ -103,7 +105,8 @@ def get_drink():
 '''
 
 @app.route('/drinks/<int:drink_id>', methods=['PATCH'])
-def update_drink(drink_id):
+@requires_auth('patch:drinks')
+def update_drink(payload, drink_id):
     drink = Drink.query.filter(Drink.id == drink_id).one_or_none()
     if drink is None:
         abort(404)
@@ -137,7 +140,8 @@ def update_drink(drink_id):
 '''
 
 @app.route('/drinks/<int:drink_id>', methods=['DELETE'])
-def delete_drink(drink_id):
+@requires_auth('delete:drinks')
+def delete_drink(payload, drink_id):
     drink = Drink.query.filter(Drink.id == drink_id).one_or_none()
     if drink is None:
         abort(404)
@@ -170,3 +174,11 @@ def not_found(error):
                     "error": 404,
                     "message": "resource not found"
                     }), 404
+
+@app.errorhandler(AuthError)
+def auth_error(error):
+    return jsonify({
+                    "success": False,
+                    "error": AuthError,
+                    "message": "resource not found"
+                    }), AuthError
