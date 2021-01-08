@@ -165,7 +165,7 @@ def unprocessable(error):
                     "success": False, 
                     "error": 422,
                     "message": "unprocessable"
-                    }), 422
+                    })
 
 @app.errorhandler(404)
 def not_found(error):
@@ -173,12 +173,12 @@ def not_found(error):
                     "success": False,
                     "error": 404,
                     "message": "resource not found"
-                    }), 404
+                    })
 
 @app.errorhandler(AuthError)
 def auth_error(error):
     return jsonify({
                     "success": False,
-                    "error": AuthError,
-                    "message": "resource not found"
-                    }), AuthError
+                    "error": error.status_code,
+                    "message": error.error
+                    })
